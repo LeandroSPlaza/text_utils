@@ -2,9 +2,9 @@ name: CI/CD Python Package
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   pull_request:
-    branches: ["main"]
+    branches: [main]
   release:
     types: [published]
 
@@ -26,22 +26,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-
-      - name: Criar ambiente virtual
-        run: python -m venv .venv
+          cache: pip
 
       - name: Instalar dependências
         run: |
-          source .venv/bin/activate
           python -m pip install --upgrade pip
           pip install pytest build
           pip install -e .
 
       - name: Rodar testes
-        run: |
-          source .venv/bin/activate
-          pytest
+        run: pytest
 
   build:
     name: Build pacote
@@ -56,26 +50,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "pip"
-
-      - name: Criar ambiente virtual
-        run: python -m venv .venv
+          cache: pip
 
       - name: Instalar dependências
         run: |
-          source .venv/bin/activate
           python -m pip install --upgrade pip
           pip install build twine
 
       - name: Gerar pacote
-        run: |
-          source .venv/bin/activate
-          python -m build
+        run: python -m build
 
       - name: Verificar pacote
-        run: |
-          source .venv/bin/activate
-          twine check dist/*
+        run: twine check dist/*
 
       - name: Listar arquivos gerados
         run: ls -lh dist/
@@ -87,11 +73,9 @@ jobs:
           path: dist/
 
   publish:
-    name: Publicar no PyPI (Token)
+    name: Publicar no PyPI
     needs: build
     runs-on: ubuntu-latest
-
-    # Executa somente quando uma release é publicada
     if: github.event_name == 'release'
 
     steps:
